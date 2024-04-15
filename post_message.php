@@ -1,4 +1,7 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: *");
+header("Access-Control-Allow-Headers: *");
 # 此API使用方式：POST请求，来向数据库中写入数据，参数nickname，message，返回写入的数据
 $q = file_get_contents("php://input");
 # 验证格式是否正确，必须包含nickname，message
@@ -33,4 +36,3 @@ try {
 }
 
 echo $q;
-?>

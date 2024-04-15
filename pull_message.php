@@ -1,4 +1,7 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: *");
+header("Access-Control-Allow-Headers: *");
 # 此API使用方式：GET请求，参数count，返回最新count条消息
 $q = $_GET["count"];
 $SQL_addr = "localhost:3306";

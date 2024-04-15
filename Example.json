@@ -1,0 +1,18 @@
+[
+  {
+    "type": "toServer",
+    "method": "pull or push",
+    "pullNum": 1
+  },
+  {
+    "type": "toClient",
+    "method": "giveMessage",
+    "message": [
+      {
+        "type": "text",
+        "sender": "nickname",
+        "text": "You have been pulled"
+      }
+    ]
+  }
+]
