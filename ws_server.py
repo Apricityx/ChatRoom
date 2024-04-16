@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import pymysql as sql
 import json
+import ssl
 
 database_url = 'localhost'
 clients = []
@@ -18,7 +19,7 @@ class DB:
     def __init__(self):
         # 连接到数据库
         f = open("passwd")
-        passwd = f.read()
+        passwd = f.read().strip()
         f.close()
         db = sql.connect(host="localhost", user="root", password=passwd, database='chatchannel', charset='utf8')
         cursor = db.cursor()
@@ -131,7 +132,15 @@ async def server_start(websocket, path):
 
 
 # pull_message(1)
-
+# ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+# ssl_context.load_cert_chain('pve.zwtsvx.xyz_bundle.pem', 'pve.zwtsvx.xyz.key')
+#
+# start_server = websockets.serve(
+#     server_start,
+#     "localhost",
+#     8083,
+#     ssl=ssl_context
+# )
 start_server = websockets.serve(server_start, "localhost", 8765)
 
 asyncio.get_event_loop().run_until_complete(start_server)

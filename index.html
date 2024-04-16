@@ -120,13 +120,13 @@
     function save_cookie() {
         let nickname = document.getElementById("nickname").value
         console.log(`将${nickname}存进cookie`)
-        document.cookie = `nickname=${nickname};max-age= 999999999`
+        document.cookie = `nickname=${nickname};;max-age= 999999999`
     }
 
     console.log(document.cookie)
     if (document.cookie !== "") {
         let cookies = document.cookie.split("=")
-        document.getElementById("nickname").value = cookies[1]
+        document.getElementById("nickname").value = cookies[1].split(";")[0]
     }
     const api_url = "localhost"
 
