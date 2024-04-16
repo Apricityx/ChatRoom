@@ -27,6 +27,25 @@
             width: 97vw;
             height: 7vh;
         }
+
+        #message_container {
+            width: 97vw;
+            overflow: scroll;
+            /*height: 4vh;*/
+        }
+
+        .message {
+            display: inline;
+            border: none;
+        }
+
+        .time {
+            /*居右*/
+            text-align: right;
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
     </style>
 </head>
 
@@ -36,15 +55,22 @@
 
     </div>
     <div id="send_container">
-        <input type="text" name="name" placeholder="请输入昵称" id="nickname">
+        <input type="text" name="name" placeholder="请输入昵称" id="nickname" readonly
+               onfocus="this.removeAttribute('readonly');" autocomplete="off" oninput="save_cookie()">
         <br>
-        <input type="text" name="age" placeholder="请输入消息" id="message">
+        <input type="text" name="text" placeholder="请输入消息" id="message" readonly
+               onfocus="this.removeAttribute('readonly');" autocomplete="off">
         <button id="send" onclick="sendHandler()">发送</button>
     </div>
 </div>
 
 </body>
 <script>
+    window.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            sendHandler()
+        }
+    })
     let chat_container = document.getElementById("message_container")
     // Create WebSocket connection.
     const socket = new WebSocket("ws://localhost:8765");
@@ -59,16 +85,49 @@
     socket.addEventListener("message", function (event) {
         console.log("Message from server ", event.data);
         let message = JSON.parse(event.data)
-        if (message.method === "push") {
-            for (let i = 0; i < message.data.length; i++) {
-                let chat = document.createElement("div")
-                chat.innerHTML = message.data[i].nickname + ": " + message.data[i].message
-                chat_container.appendChild(chat)
+        if (message.method === "pull") { // 将客户端向服务器拉去信息的过程定义为pull
+            for (let i = message.data.length - 1; i >= 0; i--) {
+                let message_container = document.createElement("div")
+                message_container.className = 'message_container'
+                let message_ = document.createElement("p")
+                message_.className = 'message'
+                message_.innerHTML = message.data[i].nickname + ": " + message.data[i].message
+                let time = document.createElement("p")
+                time.className = 'time'
+                time.innerHTML = message.data[i].timestamp
+                message_container.appendChild(message_)
+                message_container.appendChild(time)
+                chat_container.appendChild(message_container)
             }
+        } else if (message.method === "update") {
+            console.log("更新消息")
+            console.log(message.data)
+            let message_container = document.createElement("div")
+            message_container.className = 'message_container'
+            let message_ = document.createElement("p")
+            message_.className = 'message'
+            message_.innerHTML = message.data[0].nickname + ": " + message.data[0].message
+            let time = document.createElement("p")
+            time.className = 'time'
+            time.innerHTML = message.data[0].timestamp
+            message_container.appendChild(message_)
+            message_container.appendChild(time)
+            chat_container.appendChild(message_container)
         }
     });
 </script>
 <script>
+    function save_cookie() {
+        let nickname = document.getElementById("nickname").value
+        console.log(`将${nickname}存进cookie`)
+        document.cookie = `nickname=${nickname};max-age= 999999999`
+    }
+
+    console.log(document.cookie)
+    if (document.cookie !== "") {
+        let cookies = document.cookie.split("=")
+        document.getElementById("nickname").value = cookies[1]
+    }
     const api_url = "localhost"
 
     function getChat(num) {
@@ -83,7 +142,15 @@
     function sendHandler() {
         let nickname = document.getElementById("nickname").value
         let message = document.getElementById("message").value
-        const data = {nickname: nickname, message: message};
+        if (nickname === "" || message === "") {
+            alert("昵称和消息不能为空")
+            return
+        }
+        document.getElementById("message").value = ""
+        let data = {nickname: nickname, message: message};
+        let sending = JSON.stringify({method: "push", data: data})
+        console.log(sending)
+        socket.send(sending);
     }
 </script>
 <script>
